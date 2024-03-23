@@ -1,5 +1,8 @@
 ---
 title: "Case Study 1"
+subtitle: "AKSTA Statistical Computing"
+author: "Bence Vass and Maria-Theresia Dvorak"
+date: "2024-04-16"
 output: html_document
 ---
 
@@ -9,21 +12,34 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### 1. Ratio of Fibonacci numbers
 
-(a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using for and once using while.
-(b) Benchmark the two functions for n = 200 and n = 2000 (you can use package microbenchmark or package bench for this purpose). Which function is faster?
-(c) Plot the sequence for n = 100. For which value n it starts to converge? What is the number that it converges to?
+(a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using **for** and once using **while**.
+(b) Benchmark the two functions for $n = 200$ and $n = 2000$ (you can use package **microbenchmark** or package **bench** for this purpose). Which function is faster?
+(c) Plot the sequence for $n = 100$. For which value n it starts to converge? What is the number that it converges to?
 
 ### 2. Gamma function
 
 (a) Write a function to compute the following for n a positive integer using the gamma function in base R. $$
     \rho_n = \frac{Γ((n − 1)/2)}{Γ(1/2)Γ((n − 2)/2)}
     $$
-(b) Try n = 2000. What do you observe? Why do you think the observed behavior happens?
-(c) Write an implementation which can also deal with large values of n \> 1000. d. Plot $\rho_n/\sqrt{n}$ρn/√n for different values of n. Can you guess the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$?
+(b) Try $n = 2000$. What do you observe? Why do you think the observed behavior happens?
+(c) Write an implementation which can also deal with large values of $n > 1000$. 
+(d) Plot $\rho_n/\sqrt{n}$ for different values of n. Can you guess the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$?
 
 ### 3. The golden ratio
 
-Two positive numbers x and y with x \> y are said to be in the golden ratio if the ratio between the larger number and the smaller number is the same as the ratio between their sum and the larger number: x=x+y yx The golden ratio Φ = x/y can be computed as a solution to Φ2 − Φ − 1 = 0 and is √ 5+1 2 Φn+1 = Φn + Φn−1 Φ= and it satisfies the Fibonacci-like relationship: (a) Write an R function which computes Φn+1 using the recursion above (go up to n = 1000) . (b) Write a function which computes this Φn+1 by simply using the power operator ˆ. (c) Use once == and once all.equal to compare Φn+1 obtained in a. vs the one obtained in b. for n = 12, 60, 120, 300. What do you observe? If there are any differences, what can be the reason?
+Two positive numbers x and y with x \> y are said to be in the golden ratio if the ratio between the larger number and the smaller number is the same as the ratio between their sum and the larger number: 
+$$\frac{x}{y}=\frac{x+y}{x}$$
+The golden ratio $\Phi = x/y$ can be computed as a solution to $\Phi^2 − \Phi − 1 = 0$ and is 
+$$\Phi=\frac{\sqrt{5}+1}{2}$$
+
+and it satisfies the Fibonacci-like relationship: 
+$$\Phi^{n+1} = \Phi^{n} + \Phi^{n−1}$$
+
+(a) Write an R function which computes $\Phi^{n+1}$ using the recursion above (go up to n = 1000).
+
+(b) Write a function which computes this $\Phi^{n+1}$ by simply using the power operator ^. 
+
+(c) Use once == and once all.equal to compare $\Phi^{n+1}$ obtained in a. vs the one obtained in b. for $n = 12, 60, 120, 300$. What do you observe? If there are any differences, what can be the reason?
 
 ### 4. Game of craps
 
@@ -37,12 +53,14 @@ Read over the code below.
 
 (b) Explain (in text) what you would change to make the code more readable.
 
-(c) Change the code according to a. and wrap it in a function. This function should have at most 10 lines (without adding commands to more lines such as x \<- 1; y \<- 2. Such commands will count as 2 lines!). Check that the function called on the same input outputs the same as the provided code.
+(c) Change the code according to a. and wrap it in a function. This function should have at most 10 lines (without adding commands to more lines such as **x \<- 1; y \<- 2**. Such commands will count as 2 lines!). Check that the function called on the same input outputs the same as the provided code.
+
 
 ```{r}
 set.seed(1)
 x <- rnorm(1000)
-y <- 2 + x + rnorm(1000) df <- data.frame(x, y)
+y <- 2 + x + rnorm(1000) 
+df <- data.frame(x, y)
 
 cat("Step", 1, "\n")
 fit1 <- lm(y ~ x, data = df[-(1:250),])
@@ -147,7 +165,7 @@ kwtest <- function (x, g, ...) {
 
     ```
 
-(c) Make a faster version of kwtest() that only computes the Kruskal-Wallis test statistic when the input is a numeric variable x and a variable g which gives the group membership. You can try simplifying the function above or by coding from the mathematical definition (see <https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance>). This function should also perform some checks to ensure the correctness of the inputs (use kwtest() as inspiration).
+(c) Make a faster version of kwtest() that only computes the Kruskal-Wallis **test statistic** when the input is a numeric variable x and a variable g which gives the group membership. You can try simplifying the function above or by coding from the mathematical definition (see <https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance>). This function should also perform some checks to ensure the correctness of the inputs (use kwtest() as inspiration).
 
 (d) Consider the following scenario. You have samples available from multiple experiments m = 1000 where you collect the numerical values for the quantity of interest x and the group membership for n individuals. The first 20 individuals in each sample belong to group 1, the following 20 individuals in each sample belong to group 2, the last 10 individuals in each sample belong to group 3. Use the following code to simulate such a data structure:
 
@@ -155,7 +173,8 @@ kwtest <- function (x, g, ...) {
     set.seed(1234)
     m <- 1000 # number of repetitions
     n <- 50 # number of individuals
-    X <- matrix(rt(m * n, df = 10), nrow = m) grp <- rep(1:3, c(20, 20, 10))
+    X <- matrix(rt(m * n, df = 10), nrow = m) 
+    grp <- rep(1:3, c(20, 20, 10))
     ```
 
 (e) Write a function which performs the Kruskal-Wallis test using the function stats:::kruskal.test.default() for m repeated experiments and returns a vector of m test statistics. The input of this function are a matrix X with m rows and n columns and a vector g which gives the grouping.
