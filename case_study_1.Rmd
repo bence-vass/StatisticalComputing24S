@@ -13,8 +13,61 @@ knitr::opts_chunk$set(echo = TRUE)
 ### 1. Ratio of Fibonacci numbers
 
 (a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using **for** and once using **while**.
+
+```{r}
+fib_ratio_for <- function(x) {
+  fib <- c(1, 1)
+  ratio <- c()
+  
+  for (i in 3:x) {
+    ratio <- c(ratio, fib[i - 1] / fib[i - 2])
+    fib <- c(fib, fib[i - 1] + fib[i - 2])
+  }
+  
+  return(ratio)
+}
+
+print(fib_ratio_for(10))
+```
+At first we are using a for loop to determine $r_i$. We define a vector `fib` with the first values (1,1) and  an empty vector ratio. The Function `fib_ratio` calculates the Fibonacci number $F_{n-1}+F_{n-2}$ and use them to determine our ratio. Then we append this ratio to the vector `ratio`.
+
+```{r}
+fib_ratio_while <- function(x) {
+  fib <- c(1, 1) 
+  ratio <- c()   
+  i <- 3
+  while (i <= x) {
+    fib[i] <- fib[i - 1] + fib[i - 2]
+    ratio <- c(ratio, fib[i - 1] / fib[i - 2])
+    i <- i + 1
+  }
+  
+  return(ratio)  
+}
+
+print(fib_ratio_while(10))
+```
+
 (b) Benchmark the two functions for $n = 200$ and $n = 2000$ (you can use package **microbenchmark** or package **bench** for this purpose). Which function is faster?
+
+```{r}
+library("bench")
+
+n1 <- 200
+n2 <- 2000
+mark(fib_ratio_while(n1), fib_ratio_for(n1), iterations=100)
+mark(fib_ratio_while(n2), fib_ratio_for(n2), iterations=100)
+```
+Here we are running each function 100 times to get a more accurate estimate of the typical execution time.
+This benchmarks indicate that the `fib_ratio_while` function generally performs faster than the `fib_ratio_for` function for both $n = 200$ and $n = 2000$. This suggests that the while loop implementation is more efficient in this case compared to the for loop implementation.
+
 (c) Plot the sequence for $n = 100$. For which value n it starts to converge? What is the number that it converges to?
+
+```{r}
+plot(fib_ratio_while(100), col='blue', ylab=expression("r"[i]))
+lines(fib_ratio_while(100), col='blue')
+fib_ratio_while(100)
+```
 
 ### 2. Gamma function
 
