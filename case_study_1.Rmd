@@ -27,7 +27,7 @@ Two positive numbers x and y with x \> y are said to be in the golden ratio if t
 
 ### 4. Game of craps
 
-A variation of game of craps is played as follows. The player rolls a die and if they roll a 6, they immediately wins. If a 1 is rolled, they immediately loses. If a 2, 3, 4, or 5 is rolled, then this number becomes their “point number.’ ’ The player then has up to three more rolls of the die to roll their point number again. If they do, they win otherwise they lose. Write a program in R to simulate a game of craps. Explain the steps of your program. If the code is not explained, no points will be earned.
+A variation of game of craps is played as follows. The player rolls a die and if they roll a 6, they immediately wins. If a 1 is rolled, they immediately loses. If a 2, 3, 4, or 5 is rolled, then this number becomes their “point number.’ The player then has up to three more rolls of the die to roll their point number again. If they do, they win otherwise they lose. Write a program in R to simulate a game of craps. Explain the steps of your program. If the code is not explained, no points will be earned.
 
 ### 5. Readable and efficient code
 
