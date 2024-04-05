@@ -334,6 +334,35 @@ kwtest <- function (x, g, ...) {
 
 (f) Write a function which performs the Kruskal-Wallis test using the function in point c. for m repeated experiments and returns a vector of m test statistics. The input of this function are a matrix X with m rows and n columns and a vector g which gives the grouping.
 
+    ```{r}
+    multiple_kw_fast_stats = function(X, g){
+      kw_stats = sapply(1:nrow(X), function(i){
+        res = kwtest_fast(X[i,], g)
+        res$statistic
+      })
+      return(kw_stats)
+    }
+    kw_stats = multiple_kw_stats(X, grp)
+    print(length(kw_stats))
+    ```
+
 (g) Compare the performance of the two approaches using a benchmarking package on the data generated above. Comment on the results.
 
+    ```{r}
+    library(microbenchmark)
+
+    benchmark = microbenchmark(
+      multiple_kw_stats(X, grp),
+      multiple_kw_fast_stats(X, grp),
+      times = 50
+    )
+    print(benchmark)
+    ```
+
+    *kw_fast function utilize function that are well optimized in run-time such as sum, apply etc...*
+
+    *Since most of it processed in vectorised form it it could achieve a superior performance.*
+
 (h) Now consider vectorizing the function in point c. Compare this approach to the other two. Comment on the results.
+
+    *Since the function is already could be considers vectorised, please see results above.*
