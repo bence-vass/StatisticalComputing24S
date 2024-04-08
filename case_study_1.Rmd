@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 (b) Try n = 2000. What do you observe? Why do you think the observed behavior happens?
 (c) Write an implementation which can also deal with large values of n \> 1000. d. Plot $\rho_n/\sqrt{n}$ρn/√n for different values of n. Can you guess the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$?
 
-### 3. The golden ratio
+### 3. The golden ratio.
 
 Two positive numbers x and y with x \> y are said to be in the golden ratio if the ratio between the larger number and the smaller number is the same as the ratio between their sum and the larger number: x=x+y yx The golden ratio Φ = x/y can be computed as a solution to Φ2 − Φ − 1 = 0 and is √ 5+1 2 Φn+1 = Φn + Φn−1 Φ= and it satisfies the Fibonacci-like relationship: (a) Write an R function which computes Φn+1 using the recursion above (go up to n = 1000) . (b) Write a function which computes this Φn+1 by simply using the power operator ˆ. (c) Use once == and once all.equal to compare Φn+1 obtained in a. vs the one obtained in b. for n = 12, 60, 120, 300. What do you observe? If there are any differences, what can be the reason?
 
