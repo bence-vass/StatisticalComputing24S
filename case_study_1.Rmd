@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### 1. Ratio of Fibonacci numbers
+### 1. Ratio of Fibonacci numbers.
 
 (a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using for and once using while.
 (b) Benchmark the two functions for n = 200 and n = 2000 (you can use package microbenchmark or package bench for this purpose). Which function is faster?
