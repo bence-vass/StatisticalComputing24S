@@ -193,7 +193,51 @@ This discrepancy arises due to differences in how floating-point arithmetic is h
 
 ### 4. Game of craps
 
-A variation of game of craps is played as follows. The player rolls a die and if they roll a 6, they immediately wins. If a 1 is rolled, they immediately loses. If a 2, 3, 4, or 5 is rolled, then this number becomes their “point number.’ ’ The player then has up to three more rolls of the die to roll their point number again. If they do, they win otherwise they lose. Write a program in R to simulate a game of craps. Explain the steps of your program. If the code is not explained, no points will be earned.
+A variation of game of craps is played as follows. The player rolls a die and if they roll a 6, they immediately wins. If a 1 is rolled, they immediately loses. If a 2, 3, 4, or 5 is rolled, then this number becomes their “point number". The player then has up to three more rolls of the die to roll their point number again. If they do, they win otherwise they lose. Write a program in R to simulate a game of craps. Explain the steps of your program. If the code is not explained, no points will be earned.
+
+```{r}
+point_number = sample(1:6, 1) # get a number from 1 to 6 - player rolls a die
+cat('You have rolled: ', point_number ,'\n')
+
+if(point_number == 6){ 
+  # if the rolled number is 6 player wins immediately
+  cat('You win!')
+  
+} else if (point_number == 1){
+  # if the rolled number is 1 player loses immediately
+  cat('You lose!')
+  
+} else { 
+  # handles remaining cases ( rolled: 2 | 3 | 4 | 5 )
+  cat('Your point number is: ', point_number, '\n')
+  
+  won = FALSE # set true if player rolls their point number (redundant if simul. is a func.)
+  
+  for (i in 1:3){ 
+    # repeat die roll up to 3 times
+    
+    roll = sample(1:6, 1) # get a number from 1 to 6 - player rolls a die
+    cat('On ',i, '. roll you got: ', roll, '\n')
+    
+    if(roll == point_number){
+      # handles "point number" has been rolled again - player wins
+      
+      cat('You win!')
+      won = TRUE # (redundant if simul. is a func.)
+      break # exit the loop, no more repeation is necessary
+    }
+  }
+  
+  
+  if(!won){ 
+    # handles "point number" has not been rolled out of the three repetition
+    #(redundant if simul. is a func.)
+    
+    cat('You lose!')
+  }
+  
+}
+```
 
 ### 5. Readable and efficient code
 
@@ -201,14 +245,43 @@ Read over the code below.
 
 (a) Explain (in text) what the code does.
 
+    *Generate 1000 random data samples x based on normal distribution and based on x and an other normal normal distribution further 1000 samples y are generated.*
+
+    *The generated data will be separated, such that a quarter of it will be predicted by a linear model fitted on the remaining data samples. This process is repeated four times in 1-250, 250-500, 500-750, 750-1000 splits. On each quarter the square root of the mean squared error is collected in a vector and printed at the end.*
+
 (b) Explain (in text) what you would change to make the code more readable.
 
+    *I would make the indexing of the splits easier readable, a function for the prediction and use a loop to eliminate redundancy.*
+
 (c) Change the code according to a. and wrap it in a function. This function should have at most 10 lines (without adding commands to more lines such as x \<- 1; y \<- 2. Such commands will count as 2 lines!). Check that the function called on the same input outputs the same as the provided code.
+
+    ```{r, echo=TRUE}
+    set.seed(1)
+    x <- rnorm(1000)
+    y <- 2 + x + rnorm(1000) 
+    df <- data.frame(x, y)
+
+    sqrt_mse = function(df){
+      r = c()
+      for(i in 1:4){
+        idx = (((i - 1) * 250) + 1) : (i * 250)
+        m = lm(y ~ x, data = df[-idx,])
+        pred =  predict(m, newdata = df[idx,])
+        r[i] = sqrt(mean((pred - df[idx,"y"])^2))
+      }
+      return(r)
+    }
+
+    sqrt_mse(df)
+    ```
+
+**Original Code**
 
 ```{r}
 set.seed(1)
 x <- rnorm(1000)
-y <- 2 + x + rnorm(1000) df <- data.frame(x, y)
+y <- 2 + x + rnorm(1000) 
+df <- data.frame(x, y)
 
 cat("Step", 1, "\n")
 fit1 <- lm(y ~ x, data = df[-(1:250),])
@@ -281,39 +354,115 @@ kwtest <- function (x, g, ...) {
 
     If x is a list, it contains k vectors with lengths l (l is a list with numbers where every element corresponds to the length of the i-th vector of x).
 
-    `gfgf`
+    ```         
+    if x is a list:
+      if there are atleast two elements: exit
+      if g argument is used: warn that it will be ignored
+      if not all elements x are numeric: warn
+      k = length of the list x
+      l = lengths of the elements (vectors) of the list x
+      if any of the elements length equal zero: exit
+      g = factor of numerical class representant
+      x = vectors in list to single vector
+    else (x is not a list):
+      if length of vector x not equal to length of vector g: exit
+      g = factor of class representants g
+      k = number of distinqt class representants in g
+      if only one distinqt class: exit
+
+    n = length of all elements in x
+    if only one datapoint: exit
+    r = vector with placement of each elements if they were ordered (asc.)
+    TIES = table, where to each value assigned its number of occurrence
+    // formula if the data contain no ties (wikipedia)
+    STATISTIC = sum( (sum of values in each group)^2 / (number of values in each group) )
+    // correction for ties (wikipedia)
+    STATISTIC =  [ ( 12/(length_all_obs * (length_all_obs + 1)) ) * STATISTIC - 3 * (length_all_obs + 1) ] / [ (1 - sum(TIES^3 - TIES)/(n^3 - n))) ]
+    PARAMETER = number of groups - 1
+    PVAL = chi-squared CDF at value "STATISTIC" and degree of freedom "PARAMETER"
+    return with RVAL, list contains the values of the test
+    ```
 
 (b) For example data, call the function in two ways: once using x as a list and once using x as a vector with a corresponding g argument. Ensure that the two different function calls return the same thing by aligning the inputs.
 
-    ```{r}
+    ```{r, echo=FALSE}
 
-    g = c("A", "B", "C" )
-    x = c(
+    g_test = c("A", "B", "C" )
+    x_test = c(
       7, 14, 14, 13, 12, 9, 6, 14, 12, 8,
       15, 17, 13, 15, 15, 13, 9, 12, 10, 8,
       6, 8, 8, 9, 5, 14, 13, 8, 10, 9
       )
 
-    x_list =  list(
-      "A"= c(7, 14, 14, 13, 12, 9, 6, 14, 12, 8),
-      "B"=c(15, 17, 13, 15, 15, 13, 9, 12, 10, 8),
-      "C"=c(6, 8, 8, 9, 5, 14, 13, 8, 10, 9)
+    x_list_test =  list(
+      "A" = c(7, 14, 14, 13, 12, 9, 6, 14, 12, 8),
+      "B" = c(15, 17, 13, 15, 15, 13, 9, 12, 10, 8),
+      "C" = c(6, 8, 8, 9, 5, 14, 13, 8, 10, 9)
             )
 
-    df = data.frame(group = rep(g, each=10), values = x)
+    df = data.frame(group = rep(g_test, each=10), values = x_test)
 
     print("====== Built-in ======")
     kruskal.test(values ~ group, data = df) 
 
     print("====== Exerciese with list param ======")
-    kwtest(x_list)
+    kwtest(x_list_test)
 
-    print("====== Exerciese with list param ======")
-    kwtest(x, rep(g, each=10))
+    print("====== Exerciese with vector params ======")
+    kwtest(x_test, rep(g_test, each=10))
 
     ```
 
-(c) Make a faster version of kwtest() that only computes the Kruskal-Wallis test statistic when the input is a numeric variable x and a variable g which gives the group membership. You can try simplifying the function above or by coding from the mathematical definition (see <https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance>). This function should also perform some checks to ensure the correctness of the inputs (use kwtest() as inspiration).
+(c) Make a faster version of `kwtest()` that only computes the Kruskal-Wallis test statistic when the input is a numeric variable x and a variable g which gives the group membership. You can try simplifying the function above or by coding from the mathematical definition (see <https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance>). This function should also perform some checks to ensure the correctness of the inputs (use `kwtest()` as inspiration).
+
+    ```{r}
+    kwtest_fast = function(x, g){
+      # total number of observations across all groups
+      N = length(x)
+      # number of observations in group i
+      n_i = tapply(x, g, length)
+      # rank (among all observations) of observation
+      r_i_j = rank(x) 
+      # average rank of all observations in group i
+      r_i_mean = tapply(r_i_j, g, mean)
+      # average of all the r_i_j
+      r_mean = .5 * (N + 1)
+      
+      # formula from wikipedia
+      numerator =  sum( n_i * (r_i_mean - r_mean)^2 )
+      denominator = sum( tapply((r_i_j - r_mean)^2, g , sum) )
+      STATISTIC = (N - 1) * numerator / denominator
+      
+      PARAMETER <- length(unique(g)) - 1L  # number of groups
+      PVAL <- pchisq(STATISTIC, PARAMETER, lower.tail = FALSE)
+      names(STATISTIC) <- "Kruskal-Wallis chi-squared" 
+      names(PARAMETER) <- "df"
+      RVAL <- list(statistic = STATISTIC, parameter = PARAMETER,
+          p.value = PVAL, method = "Kruskal-Wallis rank sum test") 
+      return(RVAL)
+
+    }
+
+
+    g_test = c("A", "B", "C" )
+    x_test = c(
+      7, 14, 14, 13, 12, 9, 6, 14, 12, 8,
+      15, 17, 13, 15, 15, 13, 9, 12, 10, 8,
+      6, 8, 8, 9, 5, 14, 13, 8, 10, 9
+      )
+
+
+    print("====== kwtest_fast ======")
+    kwtest_fast(x_test, rep(g_test, each=10))
+
+
+
+
+    print("====== Built-in ======")
+    df = data.frame(group = rep(g_test, each=10), values = x_test)
+    kruskal.test(values ~ group, data = df) 
+
+    ```
 
 (d) Consider the following scenario. You have samples available from multiple experiments m = 1000 where you collect the numerical values for the quantity of interest x and the group membership for n individuals. The first 20 individuals in each sample belong to group 1, the following 20 individuals in each sample belong to group 2, the last 10 individuals in each sample belong to group 3. Use the following code to simulate such a data structure:
 
@@ -321,13 +470,65 @@ kwtest <- function (x, g, ...) {
     set.seed(1234)
     m <- 1000 # number of repetitions
     n <- 50 # number of individuals
-    X <- matrix(rt(m * n, df = 10), nrow = m) grp <- rep(1:3, c(20, 20, 10))
+    X <- matrix(rt(m * n, df = 10), nrow = m) 
+    grp <- rep(1:3, c(20, 20, 10))
+
+    # each row represent an experiment
+    # each column represent an individual
+    # therfore the first group is the first 20 columns, and so on...
+    kwtest_fast(X[1,], grp)
+
+
     ```
 
-(e) Write a function which performs the Kruskal-Wallis test using the function stats:::kruskal.test.default() for m repeated experiments and returns a vector of m test statistics. The input of this function are a matrix X with m rows and n columns and a vector g which gives the grouping.
+(e) Write a function which performs the Kruskal-Wallis test using the function stats:::kruskal.test.default() for m repeated experiments and returns a vector of m test statistics. The input of this function are a matrix X with m rows and n columns and a vector g which gives the grouping..
+
+    ```{r, echo=TRUE}
+
+    multiple_kw_stats = function(X, g){
+      kw_stats = sapply(1:nrow(X), function(i){
+        res = stats:::kruskal.test.default(X[i,], g)
+        res$statistic
+      })
+      return(kw_stats)
+    }
+
+
+    kw_stats = multiple_kw_stats(X, grp)
+    print(length(kw_stats))
+    ```
 
 (f) Write a function which performs the Kruskal-Wallis test using the function in point c. for m repeated experiments and returns a vector of m test statistics. The input of this function are a matrix X with m rows and n columns and a vector g which gives the grouping.
 
+    ```{r}
+    multiple_kw_fast_stats = function(X, g){
+      kw_stats = sapply(1:nrow(X), function(i){
+        res = kwtest_fast(X[i,], g)
+        res$statistic
+      })
+      return(kw_stats)
+    }
+    kw_stats = multiple_kw_stats(X, grp)
+    print(length(kw_stats))
+    ```
+
 (g) Compare the performance of the two approaches using a benchmarking package on the data generated above. Comment on the results.
 
+    ```{r}
+    library(microbenchmark)
+
+    benchmark = microbenchmark(
+      multiple_kw_stats(X, grp),
+      multiple_kw_fast_stats(X, grp),
+      times = 50
+    )
+    print(benchmark)
+    ```
+
+    *kw_fast function utilize function that are well optimized in run-time such as sum, apply etc...*
+
+    *Since most of it processed in vectorised form it it could achieve a superior performance.*
+
 (h) Now consider vectorizing the function in point c. Compare this approach to the other two. Comment on the results.
+
+    *Since the function is already could be considers vectorised, please see results above.*
