@@ -1,5 +1,8 @@
 ---
 title: "Case Study 1"
+subtitle: "AKSTA Statistical Computing"
+author: "Bence Vass and Maria-Theresia Dvorak"
+date: "2024-04-16"
 output: html_document
 ---
 
@@ -7,23 +10,186 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### 1. Ratio of Fibonacci numbers.
+### 1. Ratio of Fibonacci numbers
 
-(a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using for and once using while.
-(b) Benchmark the two functions for n = 200 and n = 2000 (you can use package microbenchmark or package bench for this purpose). Which function is faster?
-(c) Plot the sequence for n = 100. For which value n it starts to converge? What is the number that it converges to?
+(a) Write two different R functions which return the sequence $r_i = F_{i+1} /F_i$ for i = 1, . . . , n where $F_i$ is the i-th Fibonacci number, once using **for** and once using **while**.
+
+```{r}
+fib_ratio_for <- function(x) {
+  fib <- c(1, 1)
+  ratio <- c()
+  
+  for (i in 3:x) {
+    ratio <- c(ratio, fib[i - 1] / fib[i - 2])
+    fib <- c(fib, fib[i - 1] + fib[i - 2])
+  }
+  
+  return(ratio)
+}
+
+print(fib_ratio_for(10))
+```
+
+At first we are using a for loop to determine $r_i$. We define a vector `fib` with the first values (1,1) and  an empty vector ratio. The Function `fib_ratio` calculates the Fibonacci number $F_{n-1}+F_{n-2}$ and use them to determine our ratio. Then we append this ratio to the vector `ratio`.
+
+```{r}
+fib_ratio_while <- function(x) {
+  fib <- c(1, 1) 
+  ratio <- c()   
+  i <- 3
+  while (i <= x) {
+    fib[i] <- fib[i - 1] + fib[i - 2]
+    ratio <- c(ratio, fib[i - 1] / fib[i - 2])
+    i <- i + 1
+  }
+  
+  return(ratio)  
+}
+
+print(fib_ratio_while(10))
+```
+
+The first steps are the same like before, but we have to initialize our index i too. Here iterates the loop until the certain condition (i <= x) is met. Furthermore it's important to increase i by 1 in our loop.
+
+
+(b) Benchmark the two functions for $n = 200$ and $n = 2000$ (you can use package **microbenchmark** or package **bench** for this purpose). Which function is faster?
+
+```{r}
+library("bench")
+
+n1 <- 200
+n2 <- 2000
+mark(fib_ratio_while(n1), fib_ratio_for(n1), iterations=100)
+mark(fib_ratio_while(n2), fib_ratio_for(n2), iterations=100)
+```
+Here we are running each function 100 times to get a more accurate estimate of the typical execution time.
+This benchmarks indicate that the `fib_ratio_while` function generally performs faster than the `fib_ratio_for` function for both $n = 200$ and $n = 2000$. This suggests that the while loop implementation is more efficient in this case compared to the for loop implementation.
+
+
+(c) Plot the sequence for $n = 100$. For which value n it starts to converge? What is the number that it converges to?
+
+```{r}
+plot(fib_ratio_while(100), col='blue', ylab=expression("r"[i]))
+lines(fib_ratio_while(100), col='blue')
+fib_ratio_while(100)
+```
+
+From the sequence of ratios, we observe that starting from n = 4, the value of $r_n$ gradually approaches the limit of the sequence. By n = 16, we reach the limit, which is approximately 1.618034, known as the golden ratio.
+
 
 ### 2. Gamma function
 
 (a) Write a function to compute the following for n a positive integer using the gamma function in base R. $$
     \rho_n = \frac{Γ((n − 1)/2)}{Γ(1/2)Γ((n − 2)/2)}
     $$
-(b) Try n = 2000. What do you observe? Why do you think the observed behavior happens?
-(c) Write an implementation which can also deal with large values of n \> 1000. d. Plot $\rho_n/\sqrt{n}$ρn/√n for different values of n. Can you guess the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$?
+```{r}
+p <- function(n){
+  gamma((n-1)/2)/(gamma(1/2)*gamma((n-2)/2))
+}
+```
+
+(b) Try $n = 2000$. What do you observe? Why do you think the observed behavior happens?
+```{r}
+p(2000)
+```
+
+With n=2000 we receive NaN (Not a Number). It suggests that the computation encountered numerical issues, likely due to overflow or underflow errors when dealing with very large numbers.
+
+(c) Write an implementation which can also deal with large values of $n > 1000$. 
+
+```{r}
+p_new <- function(n){
+  rho <- lgamma((n-1)/2)-(lgamma(1/2)+lgamma((n-2)/2))
+  exp(rho)
+}
+p_new(2000)
+```
+
+Here we use `lgamma` to compute the natural logarithm of the gamma function. Then with `exp` we finally get our result. 
+This method should handle large values of n effectively without encountering numerical instability issues.
+
+(d) Plot $\rho_n/\sqrt{n}$ for different values of n. Can you guess the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$?
+
+```{r}
+n_values <- seq(1,5000, by=10)
+p_sqrt_n  <- function(n){
+  p_new(n)/sqrt(n)
+}
+p_sqrt_n_values <- sapply(n_values, p_sqrt_n)
+
+plot(n_values, p_sqrt_n_values, type = "l", 
+     xlab = "n", ylab = "ρn/√n", 
+     main = "Plot of ρn/√n for different values of n", col = "blue")
+```
+
+We see that the limit of $\rho_n / \sqrt{n}$ for $n \rightarrow \infty$ is 0.39.
 
 ### 3. The golden ratio
 
-Two positive numbers x and y with x \> y are said to be in the golden ratio if the ratio between the larger number and the smaller number is the same as the ratio between their sum and the larger number: x=x+y yx The golden ratio Φ = x/y can be computed as a solution to Φ2 − Φ − 1 = 0 and is √ 5+1 2 Φn+1 = Φn + Φn−1 Φ= and it satisfies the Fibonacci-like relationship: (a) Write an R function which computes Φn+1 using the recursion above (go up to n = 1000) . (b) Write a function which computes this Φn+1 by simply using the power operator ˆ. (c) Use once == and once all.equal to compare Φn+1 obtained in a. vs the one obtained in b. for n = 12, 60, 120, 300. What do you observe? If there are any differences, what can be the reason?
+Two positive numbers x and y with x \> y are said to be in the golden ratio if the ratio between the larger number and the smaller number is the same as the ratio between their sum and the larger number: 
+$$\frac{x}{y}=\frac{x+y}{x}$$
+(a) Write an R function which computes $\Phi^{n+1}$ using the recursion above (go up to n = 1000).
+
+```{r}
+memo <- numeric(1000)  
+phi_power <- function(n) {
+  if (n == 0) {
+    return((sqrt(5) + 1) / 2)  
+  } else if (n == 1) {
+    return(((sqrt(5) + 1) / 2)^2)  
+  } else {
+    if (memo[n] == 0) {  
+      phi_n <- phi_power(n - 1)
+      phi_n_minus_1 <- phi_power(n - 2)
+      memo[n] <<- phi_n + phi_n_minus_1  
+    }
+    return(memo[n])  
+  }
+}
+
+for (n in 0:10) {
+  phi_n_plus_1 <- phi_power(n)
+  print(paste("Phi^", n+1, " =", phi_n_plus_1))
+}
+```
+
+The function checks if $n = 0$, the function returns $\Phi^1 =(\sqrt{5} + 1) / 2$. If $n = 1$, the function returns $\left((\sqrt{5} + 1) / 2\right)^2$.
+For $n > 1$, the function recursively calculates $\Phi^{n-1}$ and $\Phi^{n-2}$ by calling itself with $n - 1$ and $n - 2$ as arguments. It then returns the sum of these two values, which corresponds to $\Phi^n + \Phi^{n-1}$ according to the Fibonacci-like relationship.
+
+(b) Write a function which computes this $\Phi^{n+1}$ by simply using the power operator ^. 
+
+```{r}
+phi_power_simple <- function(n) {
+  phi <- (sqrt(5) + 1) / 2
+  return(phi^(n+1))
+}
+
+for (n in 0:10) {
+  phi_n_plus_1 <- phi_power_simple(n)
+  print(paste("Phi^", n+1, " =", phi_n_plus_1))
+}
+```
+
+
+(c) Use once == and once all.equal to compare $\Phi^{n+1}$ obtained in a. vs the one obtained in b. for $n = 12, 60, 120, 300$. What do you observe? If there are any differences, what can be the reason?
+
+```{r}
+n_values <- c(12, 60, 120, 300)
+
+for (n in n_values) {
+  result_a <- phi_power(n)
+  print(result_a)
+  result_b <- phi_power_simple(n)
+  print(result_b)
+  
+  cat("For n =", n, ", results are equal using ==:", result_a == result_b, "\n")
+  
+  cat("For n =", n, ", results are equal using all.equal:", all.equal(result_a, result_b), "\n\n")
+}
+```
+
+From the output, we observe that the results obtained from the two methods, `phi_power` and `phi_power_simple`, are not exactly equal when using the equality operator `==`, but they are considered equal when using the `all.equal` function.
+This discrepancy arises due to differences in how floating-point arithmetic is handled in the two methods. The `==` operator checks for exact equality, which may fail due to small rounding errors in floating-point calculations. On the other hand, the `all.equal` function compares values within a specified tolerance level and considers them equal if they are sufficiently close, which is why it returns TRUE for all comparisons.
 
 ### 4. Game of craps
 
