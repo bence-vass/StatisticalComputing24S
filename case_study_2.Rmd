@@ -86,7 +86,7 @@ class_data = read_excel('OGHIST.xlsx', sheet='Country Analytical History')
 col_index = which(class_data[5,] == 2020)
 class_data = class_data[ , c(1, 2, col_index)]
 class_data = class_data[c(11:228),]
-colnames(class_data) = c('ISO 3166','country', 'income classification (2020)')
+colnames(class_data) = c('ISO 3166','country', 'status')
 
 print("Number of known values in column:")
 colSums(!is.na(class_data))
@@ -131,5 +131,86 @@ colSums(!is.na(extended_data))
 continent_data = read_csv("ISO-3166-Countries-with-Regional-Codes.csv", show_col_types = FALSE)
 continent_data = select(continent_data, c(3,6,7))
 colnames(continent_data) = c('ISO 3166', 'continent', 'region')
-geo_all_data = left_join(all_data, continent_data, by="ISO 3166")
+df_vars = left_join(all_data, continent_data, by="ISO 3166")
+```
+
+**observational units:** countries
+
+**the variables:** median age, unermployment , net migr., income class
+
+Variables are the characteristics or attributes measured or observed for each observational unit.
+
+**What can be considered fixed :** Fixed variables are those that remain constant for all observational units. For example, if the dataset includes information about the continents and regions to which each country belongs, these would be considered fixed variables.
+
+**vs measured variables:** Measured variables are those that vary across observational units.
+
+Tidy the data if needed. needed
+
+## g.
+
+```{r}
+status_freq <- table(df_vars$status)
+status_freq
+```
+
+## h.
+
+```{r}
+absolute_freq <- table(df_vars$continent, df_vars$status)
+absolute_freq
+
+relative_freq <- prop.table(absolute_freq, margin = 1)
+relative_freq
+```
+
+## i.
+
+H: eu
+
+L: africa
+
+UM: Amer
+
+## k.
+
+```{r}
+america_data = df_vars %>% filter(region %in% c('Northern America', 'Latin America and the Caribbean'))
+absolute_freq_america <- table(america_data$region, america_data$status)
+absolute_freq_america
+```
+
+us rich, mexico bad rawrrr
+
+## l.
+
+```{r}
+low_middle_america <- df_vars %>%
+  filter(status == "LM") %>%
+  filter(region %in% c('Northern America', 'Latin America and the Caribbean'))
+
+low_middle_america
+
+```
+
+prolly not. need to check
+
+## m.
+
+```{r}
+df_vars$status <- factor(df_vars$status, levels = c("L", "LM", "UM", "H"))
+
+df_vars$`median age` = as.numeric(df_vars$`median age`)
+df_vars$`net migration rate` = as.numeric(df_vars$`net migration rate`)
+df_vars$`youth unemployment rate` = as.numeric(df_vars$`youth unemployment rate`)
+
+mean_median_age <- df_vars %>%
+  group_by(status) %>%
+  summarize(
+    mean_median_age = mean(`median age`, na.rm = TRUE),
+    avg_youth_unemployment = mean(`youth unemployment rate`, na.rm = TRUE),
+    avg_net_migration = mean(`net migration rate`, na.rm = TRUE)
+  )
+
+mean_median_age
+
 ```
