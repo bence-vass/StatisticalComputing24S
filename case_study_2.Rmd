@@ -1,0 +1,135 @@
+---
+title: "case_study_2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## a.
+
+```{r}
+library(readr)
+library(tidyr)
+
+
+d343 = read.fwf(
+  'rawdata_343.txt',
+  skip = 2,
+  strip=TRUE,
+  c(8, 75-1-8, 4), 
+)
+d343 = d343[2:3]
+colnames(d343) = c('country', 'median age')
+head(d343)
+
+d347 = read.fwf(
+  'rawdata_347.txt',
+  skip = 2,
+  strip=TRUE,
+  c(8, 73-1-8, 6),
+)
+d347 = d347[2:3]
+colnames(d347) = c('country', 'net migration rate')
+head(d347)
+
+d373 = read.csv(
+  'rawdata_373.csv',
+  header = TRUE,
+  strip.white=TRUE,
+)
+d373[,1] = trimws(d373[,1])
+colnames(d373) = c('country', 'youth unemployment rate')
+head(d373)
+```
+
+## b.
+
+```{r}
+
+merged_data = d343 %>%
+  full_join(d347, by = 'country') %>%
+  left_join(d373, by = 'country')
+
+dim(merged_data)
+print("Number of known values in column:")
+colSums(!is.na(merged_data))
+```
+
+## c.
+
+```{r, echo=TRUE}
+library(readxl)
+
+class_data = read_excel('OGHIST.xlsx', sheet='Country Analytical History')
+col_index = which(class_data[5,] == 2020)
+class_data = class_data[ , c(1, 2, col_index)]
+class_data = class_data[c(11:228),]
+colnames(class_data) = c('ISO 3166','country', 'income classification (2020)')
+
+print("Number of known values in column:")
+colSums(!is.na(class_data))
+```
+
+## d.
+
+```{r}
+
+extended_data = merge(merged_data, class_data, by='country')
+colSums(!is.na(extended_data))
+```
+
+1.   Can be merged, but values will be lost in process. From the original 217 values it was reduced to 184 after the merge.
+
+    ```{r}
+
+    country_codes = read_csv(
+      "Country Data Codes.csv", 
+      show_col_types = FALSE
+    )
+    country_codes = country_codes[, c(1, 2)]
+    colnames(country_codes) = c('country', 'ISO 3166')
+
+    merged_data_w_iso = left_join(
+      merged_data, 
+      country_codes,
+      by="country"
+    ) 
+    colSums(!is.na(merged_data_w_iso))
+
+    all_data = left_join(merged_data_w_iso ,class_data, by='ISO 3166')
+    colSums(!is.na(all_data))
+
+
+    ```
+
+## e.
+
+```{r}
+
+continent_data = read_csv("ISO-3166-Countries-with-Regional-Codes.csv", show_col_types = FALSE)
+continent_data = select(continent_data, c(3,6,7))
+colnames(continent_data) = c('ISO 3166', 'continent', 'region')
+geo_all_data = left_join(all_data, continent_data, by="ISO 3166")
+```
